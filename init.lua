@@ -91,7 +91,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -166,6 +166,32 @@ vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+
+-- local keymap = vim.keymap.set
+-- local opts = { noremap = true, silent = true }
+
+vim.keymap.set('n', '<leader>wsh', ':split<CR>', {
+  noremap = true, silent = true, desc = 'Split window horizontally'
+})
+vim.keymap.set('n', '<leader>wsv', ':vsplit<CR>', {
+  noremap = true, silent = true, desc = 'Split window vertically'
+})
+vim.keymap.set('n', '<leader>wsd', '<C-w>q', {
+  noremap = true, silent = true, desc = 'Close split'
+})
+
+-- switch buffer
+vim.keymap.set('n', '<leader>bd', ':bd<CR>', { desc = 'Delete buffer' })
+vim.keymap.set('n', '<M-w>', ':bd<CR>', { desc =  'Delete buffer' })
+vim.keymap.set('n', '<M-l>', ':bn<CR>', { desc =  'Next buffer' })
+vim.keymap.set('n', '<M-h>', ':bp<CR>', { desc =  'Prev buffer' })
+vim.keymap.set('n', '<C-Tab>', ':bn<CR>', { desc =  'Next buffer' })
+vim.keymap.set('n', '<C-S-Tab>', ':bp<CR>', { desc =  'Prev buffer' })
+vim.keymap.set('n', '<M-Tab>', '<C-w>w', { desc = 'Next window' })
+
+-- save
+vim.keymap.set('n', '<F12>', '<Esc>:w<CR>', { desc = 'Save current buffer' })
+vim.keymap.set('i', '<F12>', '<Esc>:w<CR>', { desc = 'Save current buffer' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -281,6 +307,7 @@ require('lazy').setup({
 
       -- Document existing key chains
       require('which-key').register {
+        ['<leader>b'] = { name = '[B]uffers', _ = 'which_key_ignore' },
         ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
         ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
         ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
@@ -374,8 +401,9 @@ require('lazy').setup({
       local builtin = require 'telescope.builtin'
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
+      vim.keymap.set('n', '<leader>ss', builtin.git_files, { desc = '[S]earch Git' })
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
-      vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
+      vim.keymap.set('n', '<leader>st', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
@@ -658,6 +686,7 @@ require('lazy').setup({
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
         -- javascript = { { "prettierd", "prettier" } },
+        rubocop = { 'rubocop' }
       },
     },
   },
@@ -777,17 +806,22 @@ require('lazy').setup({
     -- Change the name of the colorscheme plugin below, and then
     -- change the command in the config to whatever the name of that colorscheme is.
     --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
-    init = function()
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`
+    -- 'folke/tokyonight.nvim',
+    -- priority = 1000, -- make sure to load this before all the other start plugins
+    -- init = function()
+    --   -- Load the colorscheme here.
+    --   -- Like many other themes, this one has different styles, and you could load
+    --   -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
+    --   vim.cmd.colorscheme 'tokyonight-night'
 
-      -- You can configure highlights by doing something like:
-      vim.cmd.hi 'Comment gui=none'
+    --   -- You can configure highlights by doing something like:
+    --   vim.cmd.hi 'Comment gui=none'
+    'catppuccin/nvim',
+    name = 'catppuccin',
+    priority = 1000,
+    init = function()
+      vim.cmd.colorscheme 'catppuccin-mocha'
     end,
   },
 
@@ -863,6 +897,17 @@ require('lazy').setup({
       --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
     end,
   },
+  -- {
+  --   "nvim-tree/nvim-tree.lua",
+  --   version = "*",
+  --   lazy = false,
+  --   dependencies = {
+  --     "nvim-tree/nvim-web-devicons",
+  --   },
+  --   config = function()
+  --     require("nvim-tree").setup {}
+  --   end,
+  -- }
 
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
@@ -873,8 +918,8 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   -- require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
@@ -885,7 +930,8 @@ require('lazy').setup({
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
+  -- { import = 'custom.config' },
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
@@ -907,6 +953,128 @@ require('lazy').setup({
     },
   },
 })
+
+-- setup bufferline
+vim.opt.termguicolors = true
+local bufferline = require("bufferline")
+bufferline.setup{
+  options = {
+    style_preset = bufferline.style_preset.minimal,
+    numbers = 'buffer_id',
+    separator_style = 'slope' -- slant, slope, thick, thin, { any | any }
+  }
+}
+
+
+-- setup gitsigns
+-- require('gitsigns').setup {
+--   signs = {
+--     add          = { text = '│' },
+--     change       = { text = '│' },
+--     delete       = { text = '_' },
+--     topdelete    = { text = '‾' },
+--     changedelete = { text = '~' },
+--     untracked    = { text = '┆' },
+--   },
+--   signcolumn = true,  -- Toggle with `:Gitsigns toggle_signs`
+--   numhl      = false, -- Toggle with `:Gitsigns toggle_numhl`
+--   linehl     = false, -- Toggle with `:Gitsigns toggle_linehl`
+--   word_diff  = false, -- Toggle with `:Gitsigns toggle_word_diff`
+--   watch_gitdir = {
+--     follow_files = true
+--   },
+--   auto_attach = true,
+--   attach_to_untracked = false,
+--   current_line_blame = false, -- Toggle with `:Gitsigns toggle_current_line_blame`
+--   current_line_blame_opts = {
+--     virt_text = true,
+--     virt_text_pos = 'eol', -- 'eol' | 'overlay' | 'right_align'
+--     delay = 1000,
+--     ignore_whitespace = false,
+--     virt_text_priority = 100,
+--   },
+--   current_line_blame_formatter = '<author>, <author_time:%Y-%m-%d> - <summary>',
+--   sign_priority = 6,
+--   update_debounce = 100,
+--   status_formatter = nil, -- Use default
+--   max_file_length = 40000, -- Disable if file is longer than this (in lines)
+--   preview_config = {
+--     -- Options passed to nvim_open_win
+--     border = 'single',
+--     style = 'minimal',
+--     relative = 'cursor',
+--     row = 0,
+--     col = 1
+--   },
+--   yadm = {
+--     enable = false
+--   },
+-- }
+require('gitsigns').setup{
+  on_attach = function(bufnr)
+    local gs = package.loaded.gitsigns
+
+    local function map(mode, l, r, opts)
+      opts = opts or {}
+      opts.buffer = bufnr
+      vim.keymap.set(mode, l, r, opts)
+    end
+
+    -- Navigation
+    map('n', ']c', function()
+      if vim.wo.diff then return ']c' end
+      vim.schedule(function() gs.next_hunk() end)
+      return '<Ignore>'
+    end, {expr=true})
+
+    map('n', '[c', function()
+      if vim.wo.diff then return '[c' end
+      vim.schedule(function() gs.prev_hunk() end)
+      return '<Ignore>'
+    end, {expr=true})
+
+    -- Actions
+    -- map('n', '<leader>hs', gs.stage_hunk)
+    -- map('n', '<leader>hr', gs.reset_hunk)
+    -- map('v', '<leader>hs', function() gs.stage_hunk {vim.fn.line('.'), vim.fn.line('v')} end)
+    -- map('v', '<leader>hr', function() gs.reset_hunk {vim.fn.line('.'), vim.fn.line('v')} end)
+    -- map('n', '<leader>hS', gs.stage_buffer)
+    -- map('n', '<leader>hu', gs.undo_stage_hunk)
+    -- map('n', '<leader>hR', gs.reset_buffer)
+    -- map('n', '<leader>hp', gs.preview_hunk)
+    map('n', '<leader>hb', function() gs.blame_line{full=true} end)
+    map('n', '<leader>gb', gs.toggle_current_line_blame)
+    map('n', '<leader>hd', gs.diffthis)
+    map('n', '<leader>hD', function() gs.diffthis('~') end)
+    map('n', '<leader>gd', gs.toggle_deleted)
+
+    -- Text object
+    -- map({'o', 'x'}, 'ih', ':<C-U>Gitsigns select_hunk<CR>')
+  end
+}
+
+require('lualine').setup {
+  options = {
+    globalstatus = false,
+    -- winbar = {
+    --   lualine_a = {'filename'},
+    --   lualine_b = {},
+    --   lualine_c = {},
+    --   lualine_x = {},
+    --   lualine_y = {},
+    --   lualine_z = {}
+    -- }
+    tabline = {
+      lualine_a = {'buffers'},
+      lualine_b = {'branch'},
+      lualine_c = {'filename'},
+      lualine_x = {},
+      lualine_y = {},
+      lualine_z = {'tabs'}
+    }
+  }
+}
+
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
