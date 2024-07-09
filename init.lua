@@ -1,3 +1,4 @@
+--
 --[[
 
 =====================================================================
@@ -171,22 +172,28 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 -- local opts = { noremap = true, silent = true }
 
 vim.keymap.set('n', '<leader>wsh', ':split<CR>', {
-  noremap = true, silent = true, desc = 'Split window horizontally'
+  noremap = true,
+  silent = true,
+  desc = 'Split window horizontally',
 })
 vim.keymap.set('n', '<leader>wsv', ':vsplit<CR>', {
-  noremap = true, silent = true, desc = 'Split window vertically'
+  noremap = true,
+  silent = true,
+  desc = 'Split window vertically',
 })
 vim.keymap.set('n', '<leader>wsd', '<C-w>q', {
-  noremap = true, silent = true, desc = 'Close split'
+  noremap = true,
+  silent = true,
+  desc = 'Close split',
 })
 
 -- switch buffer
-vim.keymap.set('n', '<leader>bd', ':bd<CR>', { desc = 'Delete buffer' })
-vim.keymap.set('n', '<M-w>', ':bd<CR>', { desc =  'Delete buffer' })
-vim.keymap.set('n', '<M-l>', ':bn<CR>', { desc =  'Next buffer' })
-vim.keymap.set('n', '<M-h>', ':bp<CR>', { desc =  'Prev buffer' })
-vim.keymap.set('n', '<C-Tab>', ':bn<CR>', { desc =  'Next buffer' })
-vim.keymap.set('n', '<C-S-Tab>', ':bp<CR>', { desc =  'Prev buffer' })
+vim.keymap.set('n', '<leader>bd', ':bp|bd #<CR>', { desc = 'Delete buffer' })
+vim.keymap.set('n', '<M-w>', ':bp|bd #<CR>', { desc = 'Delete buffer' })
+vim.keymap.set('n', '<M-l>', ':bn<CR>', { desc = 'Next buffer' })
+vim.keymap.set('n', '<M-h>', ':bp<CR>', { desc = 'Prev buffer' })
+vim.keymap.set('n', '<C-Tab>', ':bn<CR>', { desc = 'Next buffer' })
+vim.keymap.set('n', '<C-S-Tab>', ':bp<CR>', { desc = 'Prev buffer' })
 vim.keymap.set('n', '<M-Tab>', '<C-w>w', { desc = 'Next window' })
 
 -- save
@@ -215,6 +222,17 @@ vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+-- vim.keymap.set('n', '_', ':NvimTreeToggle<CR>', { desc = 'Open file Nvim Tree' })
+function Open_mini_files()
+  local current_dir = vim.fn.getcwd()
+  require('mini.files').open(current_dir)
+end
+function Open_mini_files_in_current_dir()
+  local current_dir = vim.fn.expand '%:p:h'
+  require('mini.files').open(current_dir)
+end
+vim.keymap.set('n', '-', '<cmd>lua Open_mini_files()<CR>', { desc = 'Open MiniFiles file manager' })
+vim.keymap.set('n', '_', '<cmd>lua Open_mini_files_in_current_dir()<CR>', { desc = 'Open MiniFiles file manager' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -596,7 +614,10 @@ require('lazy').setup({
         -- clangd = {},
         -- gopls = {},
         -- pyright = {},
-        -- rust_analyzer = {},
+        rubocop = {
+          cmd = { "/Users/sulcino/.rbenv/shims/rubocop", "--lsp" }
+        },
+        rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -672,10 +693,16 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
+        local disable_filetypes = {
+          c = true,
+          cpp = true,
+        }
+        local enabled_filetypes = {}
+        local filetype = vim.bo[bufnr].filetype
         return {
-          timeout_ms = 500,
+          dry_run = not enabled_filetypes[filetype],
           lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
+          timeout_ms = 500,
         }
       end,
       formatters_by_ft = {
@@ -685,8 +712,8 @@ require('lazy').setup({
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
-        -- javascript = { { "prettierd", "prettier" } },
-        rubocop = { 'rubocop' }
+        javascript = { { 'prettierd', 'prettier' } },
+        ruby = { 'rubocop' },
       },
     },
   },
@@ -759,6 +786,7 @@ require('lazy').setup({
           --  This will auto-import if your LSP supports it.
           --  This will expand snippets if the LSP sent a snippet.
           ['<C-y>'] = cmp.mapping.confirm { select = true },
+          ['<Tab>'] = cmp.mapping.confirm { select = true },
 
           -- If you prefer more traditional completion keymaps,
           -- you can uncomment the following lines
@@ -802,21 +830,25 @@ require('lazy').setup({
     end,
   },
 
-  { -- You can easily change to a different colorscheme.
+  {
+    -- You can easily change to a different colorscheme.
     -- Change the name of the colorscheme plugin below, and then
     -- change the command in the config to whatever the name of that colorscheme is.
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`
-    -- 'folke/tokyonight.nvim',
-    -- priority = 1000, -- make sure to load this before all the other start plugins
+    'folke/tokyonight.nvim',
+    priority = 1000, -- make sure to load this before all the other start plugins
     -- init = function()
     --   -- Load the colorscheme here.
     --   -- Like many other themes, this one has different styles, and you could load
     --   -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
     --   vim.cmd.colorscheme 'tokyonight-night'
+    -- end,
 
     --   -- You can configure highlights by doing something like:
     --   vim.cmd.hi 'Comment gui=none'
+  },
+  {
     'catppuccin/nvim',
     name = 'catppuccin',
     priority = 1000,
@@ -869,7 +901,7 @@ require('lazy').setup({
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'ruby', 'vim', 'vimdoc' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -897,17 +929,78 @@ require('lazy').setup({
       --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
     end,
   },
-  -- {
-  --   "nvim-tree/nvim-tree.lua",
-  --   version = "*",
-  --   lazy = false,
-  --   dependencies = {
-  --     "nvim-tree/nvim-web-devicons",
-  --   },
-  --   config = function()
-  --     require("nvim-tree").setup {}
-  --   end,
-  -- }
+
+  -- file manager
+  {
+    'nvim-tree/nvim-tree.lua',
+    version = '*',
+    lazy = false,
+    dependencies = {
+      'nvim-tree/nvim-web-devicons',
+    },
+    config = function()
+      local nvim_tree = require 'nvim-tree'
+      nvim_tree.setup {}
+    end,
+  },
+  {
+    'echasnovski/mini.nvim',
+    version = '*',
+    config = function()
+      local mini_files = require 'mini.files'
+      mini_files.setup {
+        -- No need to copy this inside `setup()`. Will be used automatically.
+        -- Customization of shown content
+        content = {
+          -- Predicate for which file system entries to show
+          filter = nil,
+          -- What prefix to show to the left of file system entry
+          prefix = nil,
+          -- In which order to show file system entries
+          sort = nil,
+        },
+
+        -- Module mappings created only inside explorer.
+        -- Use `''` (empty string) to not create one.
+        mappings = {
+          close = 'q',
+          go_in = 'l',
+          go_in_plus = 'L',
+          go_out = 'h',
+          go_out_plus = 'H',
+          reset = '<BS>',
+          reveal_cwd = '@',
+          show_help = 'g?',
+          synchronize = '=',
+          trim_left = '<',
+          trim_right = '>',
+        },
+
+        -- General options
+        options = {
+          -- Whether to delete permanently or move into module-specific trash
+          permanent_delete = false,
+          -- Whether to use for editing directories
+          use_as_default_explorer = true,
+        },
+
+        -- Customization of explorer windows
+        windows = {
+          -- Maximum number of windows to show side by side
+          max_number = math.huge,
+          -- Whether to show preview of file/directory under cursor
+          preview = true,
+          -- Width of focused window
+          width_focus = 50,
+          -- Width of non-focused window
+          width_nofocus = 15,
+          -- Width of preview window
+          width_preview = 80,
+        },
+      }
+      -- vim.keymap.set('n', '-', mini_files.open, { desc = 'Open file manager' })
+    end,
+  },
 
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
@@ -956,15 +1049,14 @@ require('lazy').setup({
 
 -- setup bufferline
 vim.opt.termguicolors = true
-local bufferline = require("bufferline")
-bufferline.setup{
+local bufferline = require 'bufferline'
+bufferline.setup {
   options = {
     style_preset = bufferline.style_preset.minimal,
     numbers = 'buffer_id',
-    separator_style = 'slope' -- slant, slope, thick, thin, { any | any }
-  }
+    separator_style = 'slope', -- slant, slope, thick, thin, { any | any }
+  },
 }
-
 
 -- setup gitsigns
 -- require('gitsigns').setup {
@@ -1010,7 +1102,7 @@ bufferline.setup{
 --     enable = false
 --   },
 -- }
-require('gitsigns').setup{
+require('gitsigns').setup {
   on_attach = function(bufnr)
     local gs = package.loaded.gitsigns
 
@@ -1022,16 +1114,24 @@ require('gitsigns').setup{
 
     -- Navigation
     map('n', ']c', function()
-      if vim.wo.diff then return ']c' end
-      vim.schedule(function() gs.next_hunk() end)
+      if vim.wo.diff then
+        return ']c'
+      end
+      vim.schedule(function()
+        gs.next_hunk()
+      end)
       return '<Ignore>'
-    end, {expr=true})
+    end, { expr = true })
 
     map('n', '[c', function()
-      if vim.wo.diff then return '[c' end
-      vim.schedule(function() gs.prev_hunk() end)
+      if vim.wo.diff then
+        return '[c'
+      end
+      vim.schedule(function()
+        gs.prev_hunk()
+      end)
       return '<Ignore>'
-    end, {expr=true})
+    end, { expr = true })
 
     -- Actions
     -- map('n', '<leader>hs', gs.stage_hunk)
@@ -1042,15 +1142,19 @@ require('gitsigns').setup{
     -- map('n', '<leader>hu', gs.undo_stage_hunk)
     -- map('n', '<leader>hR', gs.reset_buffer)
     -- map('n', '<leader>hp', gs.preview_hunk)
-    map('n', '<leader>hb', function() gs.blame_line{full=true} end)
-    map('n', '<leader>gb', gs.toggle_current_line_blame)
-    map('n', '<leader>hd', gs.diffthis)
-    map('n', '<leader>hD', function() gs.diffthis('~') end)
-    map('n', '<leader>gd', gs.toggle_deleted)
+    map('n', '<leader>hb', function()
+      gs.blame_line { full = true }
+    end)
+    map('n', '<leader>gb', gs.toggle_current_line_blame, { desc = "Toggle line [b]lame" })
+    map('n', '<leader>hd', gs.diffthis, { desc = "[D]iff this" })
+    map('n', '<leader>hD', function()
+      gs.diffthis '~'
+    end, { desc = "[D]iff this ~" })
+    map('n', '<leader>gd', gs.toggle_deleted, { desc = "Toggle [d]eleted" })
 
     -- Text object
     -- map({'o', 'x'}, 'ih', ':<C-U>Gitsigns select_hunk<CR>')
-  end
+  end,
 }
 
 require('lualine').setup {
@@ -1065,16 +1169,15 @@ require('lualine').setup {
     --   lualine_z = {}
     -- }
     tabline = {
-      lualine_a = {'buffers'},
-      lualine_b = {'branch'},
-      lualine_c = {'filename'},
+      lualine_a = { 'buffers' },
+      lualine_b = { 'branch' },
+      lualine_c = { 'filename' },
       lualine_x = {},
       lualine_y = {},
-      lualine_z = {'tabs'}
-    }
-  }
+      lualine_z = { 'tabs' },
+    },
+  },
 }
-
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
