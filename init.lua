@@ -103,7 +103,7 @@ vim.g.have_nerd_font = true
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -176,7 +176,17 @@ vim.keymap.set('n', '<leader>wsh', ':split<CR>', {
   silent = true,
   desc = 'Split window horizontally',
 })
+vim.keymap.set('n', '<C-M-h>', ':split<CR>', {
+  noremap = true,
+  silent = true,
+  desc = 'Split window horizontally',
+})
 vim.keymap.set('n', '<leader>wsv', ':vsplit<CR>', {
+  noremap = true,
+  silent = true,
+  desc = 'Split window vertically',
+})
+vim.keymap.set('n', '<C-M-v>', ':vsplit<CR>', {
   noremap = true,
   silent = true,
   desc = 'Split window vertically',
@@ -186,14 +196,20 @@ vim.keymap.set('n', '<leader>wsd', '<C-w>q', {
   silent = true,
   desc = 'Close split',
 })
+vim.keymap.set('n', '<C-M-w>', '<C-w>q', {
+  noremap = true,
+  silent = true,
+  desc = 'Close split',
+})
 
 -- switch buffer
 vim.keymap.set('n', '<leader>bd', ':bp|bd #<CR>', { desc = 'Delete buffer' })
 vim.keymap.set('n', '<M-w>', ':bp|bd #<CR>', { desc = 'Delete buffer' })
+vim.keymap.set('n', '<leader>bD', ':bd<CR>', { desc = 'Delete buffer without replace' })
 vim.keymap.set('n', '<M-l>', ':bn<CR>', { desc = 'Next buffer' })
 vim.keymap.set('n', '<M-h>', ':bp<CR>', { desc = 'Prev buffer' })
-vim.keymap.set('n', '<C-Tab>', ':bn<CR>', { desc = 'Next buffer' })
-vim.keymap.set('n', '<C-S-Tab>', ':bp<CR>', { desc = 'Prev buffer' })
+-- vim.keymap.set('n', '<C-Tab>', ':bn<CR>', { desc = 'Next buffer' })
+-- vim.keymap.set('n', '<C-S-Tab>', ':bp<CR>', { desc = 'Prev buffer' })
 vim.keymap.set('n', '<M-Tab>', '<C-w>w', { desc = 'Next window' })
 
 -- save
@@ -420,6 +436,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
       vim.keymap.set('n', '<leader>ss', builtin.git_files, { desc = '[S]earch Git' })
+      vim.keymap.set('n', ';', builtin.git_files, { desc = '[S]earch Git' })
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
       vim.keymap.set('n', '<leader>st', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
@@ -1011,7 +1028,7 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  require 'kickstart.plugins.debug',
+  -- require 'kickstart.plugins.debug',
   require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   -- require 'kickstart.plugins.autopairs',
