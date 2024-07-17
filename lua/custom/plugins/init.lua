@@ -17,7 +17,7 @@ return {
         }
       }
       local api = require 'nvim-tree.api'
-      vim.keymap.set('n', '<leader>t', api.tree.toggle)
+      vim.keymap.set('n', '<leader>tf', api.tree.toggle, { desc = '[T]oggle [f]ile manager' })
       -- api.tree.resizing(50)
     end,
   },

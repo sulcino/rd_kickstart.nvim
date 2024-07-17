@@ -196,7 +196,7 @@ vim.keymap.set('n', '<leader>wsd', '<C-w>q', {
   silent = true,
   desc = 'Close split',
 })
-vim.keymap.set('n', '<C-M-w>', '<C-w>q', {
+vim.keymap.set('n', '<C-w>', '<C-w>q', {
   noremap = true,
   silent = true,
   desc = 'Close split',
@@ -247,8 +247,8 @@ function Open_mini_files_in_current_dir()
   local current_dir = vim.fn.expand '%:p:h'
   require('mini.files').open(current_dir)
 end
-vim.keymap.set('n', '-', '<cmd>lua Open_mini_files()<CR>', { desc = 'Open MiniFiles file manager' })
-vim.keymap.set('n', '_', '<cmd>lua Open_mini_files_in_current_dir()<CR>', { desc = 'Open MiniFiles file manager' })
+vim.keymap.set('n', '-', '<cmd>lua Open_mini_files()<CR>', { desc = 'Open MiniFiles' })
+vim.keymap.set('n', '_', '<cmd>lua Open_mini_files_in_current_dir()<CR>', { desc = 'Open MiniFiles' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -344,6 +344,7 @@ require('lazy').setup({
         ['<leader>b'] = { name = '[B]uffers', _ = 'which_key_ignore' },
         ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
         ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
+        ['<leader>k'] = { name = 'setups (VSCode like)', _ = 'which_key_ignore' },
         ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
         ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
         ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
@@ -414,11 +415,20 @@ require('lazy').setup({
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
         --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
+        defaults = {
+          path_display = {
+            -- 'truncate',
+            -- 'smart',
+            'tail',
+          },
+          -- path_display = function(opts, path)
+          --   local tail = require("telescope.utils").path_tail(path)
+          --   return string.format("%s          %s", tail, path)
+          -- end,
+          mappings = {
+            i = { ['<c-enter>'] = 'to_fuzzy_refine' },
+          },
+        },
         -- pickers = {}
         extensions = {
           ['ui-select'] = {
@@ -552,7 +562,7 @@ require('lazy').setup({
 
           -- Fuzzy find all the symbols in your current workspace.
           --  Similar to document symbols, except searches over your entire project.
-          map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+          map('<leader>sy', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace S[y]mbols')
 
           -- Rename the variable under your cursor.
           --  Most Language Servers support renaming across files, etc.
@@ -632,7 +642,9 @@ require('lazy').setup({
         -- gopls = {},
         -- pyright = {},
         rubocop = {
-          cmd = { "/Users/sulcino/.rbenv/shims/rubocop", "--lsp" }
+          -- cmd = { "/Users/sulcino/.rbenv/shims/rubocop", "--lsp" }
+          cmd = { 'bundle', 'exec', 'rubocop', '--lsp' },
+          root_dir = require('lspconfig').util.root_pattern('Gemfile', '.git', '.'),
         },
         rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -785,6 +797,17 @@ require('lazy').setup({
         },
         completion = { completeopt = 'menu,menuone,noinsert' },
 
+        -- formatting = {
+        --   format = lspkind.cmp_format({
+        --     mode = 'symbol',
+        --     maxwidth = 50,
+        --     ellipsis_char = '...',
+        --     symbol_map = { Codeium = '', }
+        --   }),
+        --   expandable_indicator = true,
+        --   fields = { cmp.ItemField.Abbr, cmp.ItemField.Kind },
+        -- },
+
         -- For an understanding of why these mappings were
         -- chosen, you will need to read `:help ins-completion`
         --
@@ -803,18 +826,45 @@ require('lazy').setup({
           --  This will auto-import if your LSP supports it.
           --  This will expand snippets if the LSP sent a snippet.
           ['<C-y>'] = cmp.mapping.confirm { select = true },
-          ['<Tab>'] = cmp.mapping.confirm { select = true },
 
           -- If you prefer more traditional completion keymaps,
           -- you can uncomment the following lines
-          --['<CR>'] = cmp.mapping.confirm { select = true },
-          --['<Tab>'] = cmp.mapping.select_next_item(),
-          --['<S-Tab>'] = cmp.mapping.select_prev_item(),
+          -- ['<CR>'] = cmp.mapping.confirm { select = true },
+          -- ['<Tab>'] = cmp.mapping.select_next_item(),
+          -- ['<S-Tab>'] = cmp.mapping.select_prev_item(),
+          ['<Tab>'] = function(fallback)
+            if cmp.visible() then
+              cmp.select_next_item()
+            else
+              fallback()
+            end
+          end,
+          ['<S-Tab>'] = function(fallback)
+            if cmp.visible() then
+              cmp.select_prev_item()
+            else
+              fallback()
+            end
+          end,
+          ['<CR>'] = function(fallback)
+            if cmp.visible() then
+              cmp.confirm()
+            else
+              fallback()
+            end
+          end,
 
           -- Manually trigger a completion from nvim-cmp.
           --  Generally you don't need this, because nvim-cmp will display
           --  completions whenever it has completion options available.
           ['<C-Space>'] = cmp.mapping.complete {},
+          ['<Esc>'] = function(fallback)
+            if cmp.visible() then
+              cmp.abort()
+            else
+              fallback()
+            end
+          end,
 
           -- Think of <c-l> as moving to the right of your snippet expansion.
           --  So if you have a snippet that's like:
@@ -839,6 +889,7 @@ require('lazy').setup({
           --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
         },
         sources = {
+          { name = 'codeium' },
           { name = 'nvim_lsp' },
           { name = 'luasnip' },
           { name = 'path' },
@@ -949,18 +1000,6 @@ require('lazy').setup({
 
   -- file manager
   {
-    'nvim-tree/nvim-tree.lua',
-    version = '*',
-    lazy = false,
-    dependencies = {
-      'nvim-tree/nvim-web-devicons',
-    },
-    config = function()
-      local nvim_tree = require 'nvim-tree'
-      nvim_tree.setup {}
-    end,
-  },
-  {
     'echasnovski/mini.nvim',
     version = '*',
     config = function()
@@ -1015,10 +1054,21 @@ require('lazy').setup({
           width_preview = 80,
         },
       }
-      -- vim.keymap.set('n', '-', mini_files.open, { desc = 'Open file manager' })
+      -- vim.keymap.set('n', '-', mini_files.open, { desc = 'Open Mini files' })
     end,
   },
-
+  {
+    'Exafunction/codeium.nvim',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'hrsh7th/nvim-cmp',
+    },
+    config = function()
+      require('codeium').setup {
+        enable_chat = true,
+      }
+    end,
+  },
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- place them in the correct locations.
@@ -1030,8 +1080,8 @@ require('lazy').setup({
   --
   -- require 'kickstart.plugins.debug',
   require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
+  require 'kickstart.plugins.lint',
+  require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
@@ -1162,12 +1212,12 @@ require('gitsigns').setup {
     map('n', '<leader>hb', function()
       gs.blame_line { full = true }
     end)
-    map('n', '<leader>gb', gs.toggle_current_line_blame, { desc = "Toggle line [b]lame" })
-    map('n', '<leader>hd', gs.diffthis, { desc = "[D]iff this" })
+    map('n', '<leader>gb', gs.toggle_current_line_blame, { desc = 'Toggle line [b]lame' })
+    map('n', '<leader>hd', gs.diffthis, { desc = '[D]iff this' })
     map('n', '<leader>hD', function()
       gs.diffthis '~'
-    end, { desc = "[D]iff this ~" })
-    map('n', '<leader>gd', gs.toggle_deleted, { desc = "Toggle [d]eleted" })
+    end, { desc = '[D]iff this ~' })
+    map('n', '<leader>gd', gs.toggle_deleted, { desc = 'Toggle [d]eleted' })
 
     -- Text object
     -- map({'o', 'x'}, 'ih', ':<C-U>Gitsigns select_hunk<CR>')
@@ -1195,6 +1245,8 @@ require('lualine').setup {
     },
   },
 }
+
+vim.keymap.set('n', '<leader>kt', ':Telescope colorscheme<CR>', { desc = 'Colour schemes' })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
