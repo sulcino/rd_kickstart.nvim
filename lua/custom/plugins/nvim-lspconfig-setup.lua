@@ -178,6 +178,10 @@ return { -- LSP Configuration & Plugins
         -- tsserver = {},
         --
 
+        html = { filetypes = { 'html', 'twig', 'hbs' } },
+        cssls = {},
+        dockerls = {},
+        jsonls = {},
         lua_ls = {
           -- cmd = {...},
           -- filetypes = { ...},
@@ -187,11 +191,23 @@ return { -- LSP Configuration & Plugins
               completion = {
                 callSnippet = 'Replace',
               },
+              runtime = { version = 'LuaJIT' },
+              workspace = {
+                checkThirdParty = false,
+                libraty = {
+                  '${3rd}/luv/library',
+                  unpack(vim.api.nvim_get_runtime_file('', true)),
+                }
+              }
+              -- diagnostics = { globals = { 'vim' } },
               -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
               -- diagnostics = { disable = { 'missing-fields' } },
             },
           },
         },
+        sqlls = {},
+        tailwindcss = {},
+        yamlls = {},
       }
 
       -- Ensure the servers and tools above are installed
